@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Sharzon\Anecdotes;
 
 class AnecdoteType
 {
@@ -15,11 +15,31 @@ class AnecdoteType
         }
     }
 
+    public static function getAll()
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM types";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute();
+
+        $raw_types = $statement->fetchAll();
+
+        $types = [];
+
+        foreach ($raw_types as $type) {
+            $types[] = new AnecdoteType($type->name, $type->id);
+        }
+
+        return $types;
+    }
+
     public static function getById($id)
     {
-        $query = "SELECT * FROM types WHERE id = ?";
-
         $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM types WHERE id = ?";
 
         $statement = $pdo->prepare($query);
         $statement->execute([$id]);

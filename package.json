@@ -1,0 +1,16 @@
+{
+  "name": "anecdotes",
+  "version": "0.0.1",
+  "dependencies": {
+    "bootstrap": "^3.3.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sharzon/anecdotes.git"
+  },
+  "author": "Ilia (Sharzon) Eliseev",
+  "bugs": {
+    "url": "https://github.com/Sharzon/anecdotes/issues"
+  },
+  "homepage": "https://github.com/Sharzon/anecdotes#readme"
+}

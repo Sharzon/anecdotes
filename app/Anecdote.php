@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Sharzon\Anecdotes;
 
 class Anecdote
 {

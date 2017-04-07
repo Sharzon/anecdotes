@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Sharzon\Anecdotes;
 
 class User
 {
@@ -58,7 +58,7 @@ class User
 
         if ($user->isPairValid()) {
             session_start();
-            $_SESSION['auth']
+            $_SESSION['auth_user'] = $user->login;
             return $user;
         }
 
