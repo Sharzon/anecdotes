@@ -35,9 +35,9 @@ class Anecdote
 
     public static function getById($id)
     {
-        $query = "SELECT * FROM anecdotes WHERE id = ?";
-
         $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes WHERE id = ?";
 
         $statement = $pdo->prepare($query);
         $statement->execute([$id]);
@@ -54,6 +54,63 @@ class Anecdote
         );
 
         return $anecdote;
+    }
+
+    public static function getAllAccepted()
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE accepted = 1
+                  ORDER BY accepted_at DESC";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute();
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                AnecdoteType::getById($raw_anecdote->type_id),
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at,
+                $raw_anecdote->accepted_at
+            );
+        }
+
+        return $anecdotes;
+    }
+
+    public static function getAllAcceptedByType($type)
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE type_id = ? AND 
+                        accepted = 1
+                  ORDER BY accepted_at DESC";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute([$type->getId()]);
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                $type,
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at,
+                $raw_anecdote->accepted_at
+            );
+        }
+
+        return $anecdotes;
     }
 
     public static function create($text, $type)
@@ -121,5 +178,10 @@ class Anecdote
         $this->accepted = null;
         $this->got_at = null;
         $this->accepted_at = null;
+    }
+
+    public function getText()
+    {
+        return $this->text;
     }
 }
