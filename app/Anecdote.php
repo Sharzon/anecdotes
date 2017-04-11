@@ -84,6 +84,33 @@ class Anecdote
         return $anecdotes;
     }
 
+    public static function getAllNotAccepted()
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE accepted = 0
+                  ORDER BY got_at";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute();
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                AnecdoteType::getById($raw_anecdote->type_id),
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at
+            );
+        }
+
+        return $anecdotes;
+    }
+
     public static function getAllAcceptedByType($type)
     {
         $pdo = PdoSingleton::get();
@@ -92,6 +119,33 @@ class Anecdote
                   WHERE type_id = ? AND 
                         accepted = 1
                   ORDER BY accepted_at DESC";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute([$type->getId()]);
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                $type,
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at,
+                $raw_anecdote->accepted_at
+            );
+        }
+
+        return $anecdotes;
+    }
+
+    public static function getAllByType($type)
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE type_id = ?";
 
         $statement = $pdo->prepare($query);
         $statement->execute([$type->getId()]);
@@ -134,12 +188,12 @@ class Anecdote
             return;
         }
 
+        $pdo = PdoSingleton::get();
+
         $query = "UPDATE anecdotes 
                   SET accepted = 1,
                       accepted_at = NOW() 
                   WHERE id = ?";
-
-        $pdo = PdoSingleton::get();
 
         $statement = $pdo->prepare($query);
         $statement->execute([$this->id]);
@@ -154,12 +208,12 @@ class Anecdote
         $this->accepted_at = $anecdote->accepted_at;
     }
 
-    public function notAccept()
+    public function decline()
     {
+        $pdo = PdoSingleton::get();
+
         $query = "DELETE FROM anecdotes
                   WHERE id = ?";
-
-        $pdo = PdoSingleton::get();
 
         $statement = $pdo->prepare($query);
         $statement->execute([$this->id]);
@@ -180,8 +234,45 @@ class Anecdote
         $this->accepted_at = null;
     }
 
+    public function changeType($type_id)
+    {
+        if ($type_id == $this->type->getId()) {
+            return;
+        }
+
+        $pdo = PdoSingleton::get();
+
+        $query = "UPDATE anecdotes 
+                  SET type_id = :type_id 
+                  WHERE id = :id";
+
+        $id = $this->id;
+
+        $statement = $pdo->prepare($query);
+        $statement->execute(compact('id', 'type_id'));
+
+        $anecdote = self::getById($this->id);
+
+        $this->id = $anecdote->id;
+        $this->text = $anecdote->text;
+        $this->type = $anecdote->type;
+        $this->accepted = $anecdote->accepted;
+        $this->got_at = $anecdote->got_at;
+        $this->accepted_at = $anecdote->accepted_at;
+    }
+
     public function getText()
     {
         return $this->text;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 }

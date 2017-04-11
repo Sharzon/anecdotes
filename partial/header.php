@@ -1,14 +1,20 @@
+<?php
+
+namespace Sharzon\Anecdotes;
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Anecdotes</title>
+    <base href="http://localhost:8000">
     <link rel="stylesheet" 
-          href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+          href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" 
-          href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
+          href="/node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
     <link rel="stylesheet" 
-          href="css/style.css">
+          href="/css/style.css">
 </head>
 <body>
 
@@ -20,7 +26,20 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="offer.php">Offer an anecdote</a>
+                    <?php
+
+                    if (User::isAuth()) {
+                        ?>
+                        <li><a href="/admin/review.php">Review</a></li>
+                        <li><a href="/admin/types.php">Anecdote types</a></li>
+                        <li><a href="/admin/logout.php">Logout</a></li>
+                        <?php
+                    } else {
+                        ?>
+                        <li><a href="offer.php">Offer an anecdote</a>
+                        <?php
+                    }
+                    ?>
                 </ul>
             </div>
         </div>

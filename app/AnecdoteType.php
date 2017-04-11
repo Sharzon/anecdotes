@@ -65,6 +65,41 @@ class AnecdoteType
         return self::getById($id);
     }
 
+    public function rename($name)
+    {
+        $pdo = PdoSingleton::get();
+
+        $id = $this->id;
+
+        $query = "UPDATE types
+                  SET name = :name
+                  WHERE id = :id";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute(compact('id', 'name'));
+        
+        $this->name = self::getById($id)->getName();
+    }
+
+    public function remove($subst_type_id)
+    {
+        $anecdotes = Anecdote::getAllByType($this);
+
+        foreach ($anecdotes as $anecdote) {
+            $anecdote->changeType($subst_type_id);
+        }
+
+        $pdo = PdoSingleton::get();
+
+        $query = "DELETE FROM types WHERE id = ?";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute([$this->id]);
+
+        $this->name = null;
+        $this->id = null;
+    }
+
     public function getId()
     {
         return $this->id;

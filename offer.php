@@ -49,7 +49,9 @@ require "partial/header.php";
                         $types = AnecdoteType::getAll();
 
                         foreach ($types as $type) {
-                            echo '<option value="'.$type->getId().'">'.$type->getName().'</option>';
+                            echo '<option value="'.$type->getId().'">';
+                            echo $type->getName();
+                            echo '</option>';
                         }
 
                         ?>
