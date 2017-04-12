@@ -2,8 +2,11 @@
 
 namespace Sharzon\Anecdotes;
 
+use PDO;
+
 class Anecdote
 {
+    const PAGE_ANECDOTES_AMOUNT = 3;
     protected $id;
     protected $text;
     protected $type;
@@ -165,6 +168,101 @@ class Anecdote
         }
 
         return $anecdotes;
+    }
+
+    public static function getPageAcceptedByType($type, $page = 1)
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE type_id = :type_id AND
+                        accepted = 1
+                  ORDER BY accepted_at DESC
+                  LIMIT :start, ".self::PAGE_ANECDOTES_AMOUNT;
+
+        $type_id = $type->getId();
+        $start = ($page - 1) * self::PAGE_ANECDOTES_AMOUNT;
+
+        $statement = $pdo->prepare($query);
+        $statement->execute(compact('type_id', 'start'));
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                $type,
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at,
+                $raw_anecdote->accepted_at
+            );
+        }
+
+        return $anecdotes;
+    }
+
+    public static function getPageAccepted($page = 1)
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT * FROM anecdotes 
+                  WHERE accepted = 1
+                  ORDER BY accepted_at DESC
+                  LIMIT ?, ".self::PAGE_ANECDOTES_AMOUNT;
+
+        $start = ($page - 1) * self::PAGE_ANECDOTES_AMOUNT;
+
+        $statement = $pdo->prepare($query);
+        $statement->execute([$start]);
+
+        $raw_anecdotes = $statement->fetchAll();
+        $anecdotes = [];
+
+        foreach ($raw_anecdotes as $raw_anecdote) {
+            $anecdotes[] = new Anecdote(
+                $raw_anecdote->text,
+                AnecdoteType::getById($raw_anecdote->type_id),
+                $raw_anecdote->id,
+                $raw_anecdote->accepted,
+                $raw_anecdote->got_at,
+                $raw_anecdote->accepted_at
+            );
+        }
+
+        return $anecdotes;
+    }
+
+    public static function pagesCount()
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT COUNT(*) FROM anecdotes
+                  WHERE accepted = 1";
+
+        $statement = $pdo->prepare($query);
+        $statement->execute();
+
+        $rows_count = $statement->fetch(PDO::FETCH_NUM)[0];
+
+        return ceil($rows_count / self::PAGE_ANECDOTES_AMOUNT);
+    }
+
+    public static function pagesCountByType($type_id)
+    {
+        $pdo = PdoSingleton::get();
+
+        $query = "SELECT COUNT(*) 
+                  FROM anecdotes 
+                  WHERE type_id = ? AND accepted = 1";
+
+        $statement = $pdo->prepare($query);
+        $result = $statement->execute([$type_id]);
+
+        $rows_count = $statement->fetch(PDO::FETCH_NUM)[0];
+
+        return ceil($rows_count / self::PAGE_ANECDOTES_AMOUNT);
     }
 
     public static function create($text, $type)

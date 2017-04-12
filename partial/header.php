@@ -13,8 +13,6 @@ namespace Sharzon\Anecdotes;
           href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" 
           href="/node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" 
-          href="/css/style.css">
 </head>
 <body>
 
@@ -25,6 +23,32 @@ namespace Sharzon\Anecdotes;
                 <a class="navbar-brand" href="/">Anecdotes</a>
             </div>
             <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" 
+                           class="dropdown-toggle" 
+                           data-toggle="dropdown"
+                           role="button"
+                           aria-haspopup="true"
+                           aria-expanded="false">Type <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/">No type</a></li>
+                            <li role="separator" class="divider"></li>
+                            <?php
+
+                            $types = AnecdoteType::getAll();
+    
+                            foreach ($types as $type) {
+                                if (count(Anecdote::getAllAcceptedByType($type)) > 0) {
+                                    echo '<li><a href="/?type='.$type->getId().'">';
+                                    echo $type->getName();
+                                    echo '</a></li>';
+                                }
+                            }
+                            ?>
+                        </ul>
+                    </li>
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <?php
 

@@ -70,6 +70,7 @@ include "../partial/header.php";
                         <div class="panel-footer form-inline">
                             <button type="submit" 
                                     name="save" 
+                                    class="btn btn-success"
                                     value="<?php echo $type->getId(); ?>">
                                     Save
                             </button>
@@ -91,6 +92,7 @@ include "../partial/header.php";
                                 </select>
                                 <button type="submit" 
                                     name="remove"
+                                    class="btn btn-danger"
                                     value="<?php echo $type->getId(); ?>">
                                     Remove
                                 </button>
